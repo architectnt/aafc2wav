@@ -67,10 +67,22 @@ AAFCOUTPUT export_wav(const short* data, size_t data_length, int freq, unsigned 
 }
 
 int main(int argc, char* argv[]) {
+    if (argc == 1 || argc == 2) {
+        printf("usage\n\naafc2wav <inputpath> <output>\n(theres no need to put the extension ['.wav'] within the output path.)\n\n");
+        return -1;
+    }
+
     AAFCDECOUTPUT f = LoadAAFC(ReadFile(argv[1]).data);
+    if (!f.data) return 1;
     const char* fn = filename_without_extension(argv[2]);
 
     AAFCOUTPUT wavout = export_wav((short*)FloatToInt(f.data, f.header.samplelength, 16), f.header.samplelength, f.header.freq, f.header.channels);
+    if (!wavout.data) {
+        printf("could not export to wav\n");
+        return 2;
+    }
+
     FILE* fout = fopen(concat_path_wav(argv[2]), "wb");
     fwrite(wavout.data, 1, wavout.size, fout);
+    printf("completed!\n\nPATH: %s\n\n", fn);
 }
