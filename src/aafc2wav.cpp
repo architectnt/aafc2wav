@@ -82,7 +82,8 @@ int main(int argc, char* argv[]) {
         return 2;
     }
 
-    FILE* fout = fopen(concat_path_wav(argv[2]), "wb");
+    const char* outpath = concat_path_wav(argv[2]);
+    FILE* fout = fopen(outpath, "wb");
     fwrite(wavout.data, 1, wavout.size, fout);
-    printf("completed!\n\nPATH: %s\n\n", fn);
+    printf("completed!\n\nPATH: %s\n\n", outpath);
 }
