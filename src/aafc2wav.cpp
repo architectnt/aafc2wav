@@ -24,7 +24,7 @@ unsigned char* create_wav_header(unsigned long dtsize, unsigned long samplerate,
 }
 
 AAFCOUTPUT export_wav(const short* data, size_t data_length, int freq, unsigned char channels) {
-    unsigned char* h = create_wav_header(data_length, freq, channels, 16);
+    unsigned char* h = create_wav_header(data_length * 2, freq, channels, 16);
     size_t size = 44 + (data_length * 2);
 
     unsigned char* rst = (unsigned char*)malloc(size);
@@ -33,7 +33,8 @@ AAFCOUTPUT export_wav(const short* data, size_t data_length, int freq, unsigned 
         return {};
     }
 
-    memcpy(rst, &h, 44);
+    memcpy(rst, h, 44);
+    free(h);
     memcpy(rst + 44, data, data_length * 2);
 
     AAFCOUTPUT outp = {size, rst};

@@ -26,7 +26,6 @@
 #define LIBAAFCFUNC_H 1
 
 typedef AAFCDECOUTPUT (*AAFCImport)(const unsigned char*);
-typedef AAFC_HEADER* (*AAFCGetHeader)(const unsigned char*);
 typedef void* (*AAFCFloatToInt)(float* arr, long size, unsigned char type);
 
 
@@ -88,15 +87,6 @@ AAFCDECOUTPUT LoadAAFC(const unsigned char* data) {
         return {};
     }
     return aimport(data);
-}
-
-AAFC_HEADER* GrabHeader(const unsigned char* data) {
-    AAFCGetHeader aheader = LibHandler::getInstance(LIB_AAFC_RPATH).getFunc<AAFCGetHeader>("aafc_getheader");
-    if (aheader == NULL) {
-        perror("Could not initialize AAFC functions.");
-        return NULL;
-    }
-    return aheader(data);
 }
 
 void* FloatToInt(float* arr, long size, unsigned char type) {

@@ -19,7 +19,7 @@ static char* concat_path(const char* filename) {
 	if (!filename || *filename == '\0')
 		return NULL;
 
-	size_t len = strlen(filename) + 1;
+	size_t len = (strlen(filename) + 1) + 5;
 	char* result = (char*)malloc(len);
 	if (result)
 		snprintf(result, len, "%s.wav", filename);
