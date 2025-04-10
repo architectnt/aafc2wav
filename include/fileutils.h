@@ -1,4 +1,4 @@
-#include "aafc.h"
+#include <aafc.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -15,118 +15,14 @@
 #include <dirent.h>
 #endif
 
-static char** list_files(const char* dir, unsigned int* len) {
-	char** files = NULL;
-	*len = 0;
-	char afp[512];
-
-#ifdef _WIN32
-	char fullpath[512];
-
-	snprintf(fullpath, sizeof(fullpath), "%s/*", dir);
-	WIN32_FIND_DATA fdt;
-	HANDLE fhndl = FindFirstFile(fullpath, &fdt);
-
-	if (fhndl == INVALID_HANDLE_VALUE) {
-		return NULL;
-	}
-	while (FindNextFile(fhndl, &fdt) != 0){
-		if (!(fdt.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
-			snprintf(afp, sizeof(afp), "%s\\%s", dir, fdt.cFileName);
-			files = (char**)realloc(files, (*len + 1) * sizeof(char*));
-			files[*len] = strdup(afp);
-			(*len)++;
-		}
-	}
-	FindClose(fhndl);
-
-#else
-	DIR* dirc;
-	dirent* entry;
-
-	if (!(dirc = opendir(dir)))
+static char* concat_path(const char* filename) {
+	if (!filename || *filename == '\0')
 		return NULL;
 
-	while ((entry = readdir(dirc)) != NULL) {
-		if (entry->d_type == DT_REG) {
-			snprintf(afp, sizeof(afp), "%s/%s", dir, entry->d_name);
-			files = (char**)realloc(files, (*len + 1) * sizeof(char*));
-			files[*len] = strdup(afp);
-			(*len)++;
-		}
-	}
-	closedir(dirc);
-#endif
-
-	return files;
-}
-
-static const char* strip_path_last(const char* path) {
-	if (path == NULL || *path == '\0')
-		return NULL;
-
-	const char* lsep = NULL;
-	const char* p = path;
-
-	while (*p) {
-		if (*p == '/' || *p == '\\')
-			lsep = p;
-		p++;
-	}
-
-	if (lsep == NULL)
-		return path;
-
-	return lsep + 1;
-}
-
-static char* concat_path(const char* dir, const char* filename) {
-	if (dir == NULL || filename == NULL || *dir == '\0' || *filename == '\0')
-		return NULL;
-
-	size_t len = (strlen(dir) + strlen(filename) + strlen(".aafc/")) + 1;
+	size_t len = strlen(filename) + 1;
 	char* result = (char*)malloc(len);
 	if (result)
-		snprintf(result, len, "%s/%s.aafc", dir, filename);
-	return result;
-}
-
-static char* concat_path_aft(const char* dir, const char* filename) {
-	if (dir == NULL || filename == NULL || *dir == '\0' || *filename == '\0')
-		return NULL;
-
-	size_t len = (strlen(dir) + strlen(filename) + strlen(".aft/")) + 1;
-	char* result = (char*)malloc(len);
-	if (result)
-		snprintf(result, len, "%s/%s.aft", dir, filename);
-	return result;
-}
-
-
-static char* filename_without_extension(const char* path) {
-	if (path == NULL || *path == '\0')
-		return NULL;
-
-	const char* lsep = NULL;
-	const char* p = path;
-
-	while (*p) {
-		if (*p == '/' || *p == '\\')
-			lsep = p;
-		p++;
-	}
-
-	const char* fstr = (lsep != NULL) ? lsep + 1 : path;
-	const char* lped = strrchr(fstr, '.');
-	size_t flen = (lped != NULL) ? (size_t)(lped - fstr) : strlen(fstr);
-
-	char* result = (char*)malloc(flen + 1);
-	if (result == NULL)
-		return NULL;
-
-	strncpy(result, fstr, flen);
-	result[flen] = '\0';
-
+		snprintf(result, len, "%s.wav", filename);
 	return result;
 }
 
@@ -155,5 +51,5 @@ static AAFCOUTPUT ReadFile(const char* path) {
 	}
 
 	fclose(file);
-	return {fsize, data};
+	return { fsize, data };
 }
